@@ -1,0 +1,219 @@
+/* Dark Theme */
+body.dark-theme {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #1e1e1e;
+    color: #eee;
+}
+
+/* Light Theme */
+body.light-theme {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+body.dark-theme h1,
+body.dark-theme h2,
+body.dark-theme h3,
+body.dark-theme label {
+    color: #fff;
+}
+
+body.light-theme h1,
+body.light-theme h2,
+body.light-theme h3,
+body.light-theme label {
+    color: #333;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 1em;
+    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+body.light-theme header {
+    background-color: #eee;
+    color: #333;
+}
+
+#theme-toggle {
+    padding: 0.5em 1em;
+    background-color: #eee;
+    color: #333;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+body.dark-theme #theme-toggle {
+    background-color: #555;
+    color: #eee;
+}
+
+body.light-theme #theme-toggle {
+    background-color: #ccc;
+    color: #555;
+}
+
+.top-metrics {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    flex-wrap: wrap;
+}
+
+.metric-box {
+    background-color: #2b2b2b;
+    color: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    min-width: 150px;
+}
+
+body.light-theme .metric-box {
+    background-color: #fff;
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chart-row {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.chart {
+    flex: 1;
+    min-width: 300px;
+    height: 350px;
+    background-color: #2b2b2b;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+body.light-theme .chart {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chart > h3 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.light-theme .chart > h3 {
+    border-bottom: 1px solid #ccc;
+}
+
+.table-container {
+    padding: 20px;
+}
+
+#top-products-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+#top-products-table th,
+#top-products-table td {
+    padding: 10px 15px;
+    text-align: left;
+}
+
+#top-products-table th {
+    background-color: #444;
+    color: white;
+}
+
+body.light-theme #top-products-table th {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+#top-products-table tbody tr:nth-child(even) {
+    background-color: #333;
+    color: #eee;
+}
+
+body.light-theme #top-products-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+#top-products-table tbody tr:hover {
+    background-color: #555;
+}
+
+body.light-theme #top-products-table tbody tr:hover {
+    background-color: #ececec;
+}
+
+.radio-buttons, .checkbox-container {
+    padding: 10px 0;
+}
+
+.radio-buttons label, .checkbox-container label {
+    margin-right: 15px;
+}
+
+/* amCharts Dark Theme Adjustments */
+body.dark-theme .amcharts-ValueAxis-grid .amcharts-Grid {
+    stroke: #555;
+}
+
+body.dark-theme .amcharts-CategoryAxis-grid .amcharts-Grid {
+    stroke: #555;
+}
+
+body.dark-theme .amcharts-Label {
+    fill: #eee;
+}
+
+body.dark-theme .amcharts-Tooltip-pointer {
+    fill: #eee;
+}
+
+body.dark-theme .amcharts-Tooltip-label {
+    fill: #333;
+}
+
+/* amCharts Light Theme Adjustments */
+body.light-theme .amcharts-ValueAxis-grid .amcharts-Grid {
+    stroke: #ccc;
+}
+
+body.light-theme .amcharts-CategoryAxis-grid .amcharts-Grid {
+    stroke: #ccc;
+}
+
+body.light-theme .amcharts-Label {
+    fill: #333;
+}
+
+body.light-theme .amcharts-Tooltip-pointer {
+    fill: #333;
+}
+
+body.light-theme .amcharts-Tooltip-label {
+    fill: #fff;
+}

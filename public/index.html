@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-theme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermarket Dashboard</title>
+    <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Supermarket Dashboard</h1>
+        <button id="theme-toggle">Toggle Light Theme</button>
+    </header>
+
+    <section class="top-metrics">
+        <div class="metric-box">
+            <h3>Total Revenue</h3>
+            <p id="total-revenue">$0.00</p>
+        </div>
+        <div class="metric-box">
+            <h3>Total Sales</h3>
+            <p id="total-sales">$0.00</p>
+        </div>
+        <div class="metric-box">
+            <h3>Total Orders</h3>
+            <p id="total-orders">0</p>
+        </div>
+        <div class="metric-box">
+            <h3>Average Order Value</h3>
+            <p id="average-order-value">$0.00</p>
+        </div>
+        <div class="metric-box">
+            <h3>Total Products Sold</h3>
+            <p id="total-products-sold">0</p>
+        </div>
+        <div class="metric-box">
+            <h3>Customer Count</h3>
+            <p id="customer-count">0</p>
+        </div>
+    </section>
+
+    <div class="chart-row">
+        <div id="chartSalesByCity" class="chart"></div>
+        <div id="chartPopularProducts" class="chart"></div>
+        <div id="chartCustomerDemographics" class="chart"></div>
+    </div>
+
+    <div class="table-container">
+        <h3>Top 4 Selling Products</h3>
+        <table id="top-products-table">
+            <thead>
+                <tr>
+                    <th>Product Line</th>
+                    <th>Total Sales</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Top product data will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="chart-row">
+        <div id="chartSalesByProductFiltered" class="chart">
+            <h3>Sales by Product Line (Filtered by City)</h3>
+            <div class="radio-buttons" id="city-filter-radios">
+                <!-- Radio buttons will be dynamically added here -->
+            </div>
+        </div>
+        <div class="chart">
+            <h3>Additional Controls</h3>
+            <div class="checkbox-container">
+                <label><input type="checkbox" id="filter-option-1"> Filter Option 1</label><br>
+                <label><input type="checkbox" id="filter-option-2"> Filter Option 2</label><br>
+            </div>
+        </div>
+        <div class="chart">
+        </div>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        const LOCAL_STORAGE_KEY = 'theme';
+
+        const applyTheme = (theme) => {
+            body.classList.remove('light-theme', 'dark-theme');
+            body.classList.add(`${theme}-theme`);
+            themeToggle.textContent = theme === 'dark' ? 'Toggle Light Theme' : 'Toggle Dark Theme';
+        };
+
+        const savedTheme = localStorage.getItem(LOCAL_STORAGE_KEY);
+        const initialTheme = savedTheme || 'dark';
+        applyTheme(initialTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.classList.contains('dark-theme') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+            localStorage.setItem(LOCAL_STORAGE_KEY, newTheme);
+        });
+
+        fetch('/api/total-revenue')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('total-revenue').textContent = `$${data.totalRevenue.toFixed(2)}`;
+            });
+
+        fetch('/api/total-sales')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('total-sales').textContent = `$${data.totalSales.toFixed(2)}`;
+            });
+
+        fetch('/api/total-orders')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('total-orders').textContent = data.totalOrders;
+            });
+
+        fetch('/api/average-order-value')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('average-order-value').textContent = `$${data.averageOrderValue.toFixed(2)}`;
+            });
+
+        fetch('/api/total-products-sold')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('total-products-sold').textContent = data.totalProductsSold;
+            });
+
+        fetch('/api/customer-count')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('customer-count').textContent = data.customerCount;
+            });
+
+        function createBarChart(containerId, dataUrl, categoryField, valueField, categoryAxisLabel) {
+            fetch(dataUrl)
+                .then(response => response.json())
+                .then(data => {
+                    am5.ready(function () {
+                        let root = am5.Root.new(containerId);
+                        root._logo.dispose();
+                        root.setThemes([am5themes_Animated.new(root)]);
+                        let chart = root.container.children.push(am5xy.XYChart.new(root, {
+                            panX: true,
+                            panY: false,
+                            wheelX: "panX",
+                            wheelY: "none"
+                        }));
+                        let yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+                            categoryField: categoryField,
+                            renderer: am5xy.AxisRendererY.new(root, {
+                                inverted: true,
+                                strokeOpacity: 0.1
+                            }),
+                            tooltip: am5.Tooltip.new(root, {})
+                        }));
+                        yAxis.data.setAll(data);
+                        let xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+                            min: 0,
+                            renderer: am5xy.AxisRendererX.new(root, { strokeOpacity: 0.1 })
+                        }));
+                        let series = chart.series.push(am5xy.ColumnSeries.new(root, {
+                            name: categoryAxisLabel,
+                            xAxis: xAxis,
+                            yAxis: yAxis,
+                            valueXField: valueField,
+                            categoryYField: categoryField,
+                            orientation: "horizontal",
+                            tooltip: am5.Tooltip.new(root, {
+                                labelText: "{valueX}"
+                            })
+                        }));
+                        series.columns.template.setAll({ cornerRadiusTR: 5, cornerRadiusBR: 5 });
+                        series.data.setAll(data);
+                    });
+                });
+        }
+
+        function createDonutChart(containerId, dataUrl, categoryField, valueField) {
+            fetch(dataUrl)
+                .then(response => response.json())
+                .then(data => {
+                    am5.ready(function () {
+                        let root = am5.Root.new(containerId);
+                        root._logo.dispose();
+                        root.setThemes([am5themes_Animated.new(root)]);
+                        let chart = root.container.children.push(am5percent.PieChart.new(root, {
+                            layout: root.verticalLayout,
+                            innerRadius: am5.percent(50)
+                        }));
+                        let series = chart.series.push(am5percent.PieSeries.new(root, {
+                            valueField: valueField,
+                            categoryField: categoryField
+                        }));
+                        series.labels.template.setAll({
+                            textType: "circular",
+                            centerX: 0,
+                            centerY: 0,
+                            fontSize: 12
+                        });
+                        series.ticks.template.set("forceHidden", true);
+                        series.data.setAll(data);
+                    });
+                });
+        }
+
+        function createGroupedColumnChart(containerId, dataUrl) {
+            fetch(dataUrl)
+                .then(response => response.json())
+                .then(data => {
+                    am5.ready(function () {
+                        let root = am5.Root.new(containerId);
+                        root._logo.dispose();
+                        root.setThemes([am5themes_Animated.new(root)]);
+                        let chart = root.container.children.push(am5xy.XYChart.new(root, {
+                            panX: false,
+                            panY: false,
+                            wheelX: "panX",
+                            wheelY: "zoomX",
+                            pinchZoomX: true
+                        }));
+                        let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+                            renderer: am5xy.AxisRendererY.new(root, {})
+                        }));
+                        let xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+                            categoryField: "Gender",
+                            renderer: am5xy.AxisRendererX.new(root, {
+                                minGridDistance: 20
+                            }),
+                            tooltip: am5.Tooltip.new(root, {})
+                        }));
+                        xAxis.data.setAll(
+                            Array.from(new Set(data.map(item => item.Gender))).map(gender => ({ Gender: gender }))
+                        );
+                        let series1 = chart.series.push(am5xy.ColumnSeries.new(root, {
+                            name: "Home",
+                            xAxis: xAxis,
+                            yAxis: yAxis,
+                            valueYField: "count",
+                            categoryXField: "Gender",
+                            maskBullets: false
+                        }));
+                        series1.columns.template.setAll({
+                            width: am5.percent(60),
+                            tooltipText: "{categoryX}: {valueY}",
+                            templateField: "columnSettings"
+                        });
+
+                        series1.data.setAll(data.filter(item => item.CustomerType === 'Home'));
+
+                        let series2 = chart.series.push(am5xy.ColumnSeries.new(root, {
+                            name: "Member",
+                            xAxis: xAxis,
+                            yAxis: yAxis,
+                            valueYField: "count",
+                            categoryXField: "Gender",
+                            maskBullets: false
+                        }));
+                        series2.columns.template.setAll({
+                            width: am5.percent(40),
+                            tooltipText: "{categoryX}: {valueY}",
+                            templateField: "columnSettings"
+                        });
+                        series2.data.setAll(data.filter(item => item.CustomerType === 'Member'));
+
+                        chart.legend = am5.Legend.new(root, {});
+                        chart.legend.data.setAll(chart.series.values);
+
+                    });
+                });
+        }
+
+        function createColumnChart(containerId, dataUrl, categoryField, valueField, categoryAxisLabel) {
+            fetch(dataUrl)
+                .then(response => response.json())
+                .then(data => {
+                    am5.ready(function () {
+                        let root = am5.Root.new(containerId);
+                        root._logo.dispose();
+                        root.setThemes([am5themes_Animated.new(root)]);
+                        let chart = root.container.children.push(am5xy.XYChart.new(root, {
+                            panX: false,
+                            panY: false,
+                            wheelX: "panX",
+                            wheelY: "zoomX",
+                            pinchZoomX: true
+                        }));
+                        let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+                            renderer: am5xy.AxisRendererY.new(root, {})
+                        }));
+                        let xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+                            categoryField: categoryField,
+                            renderer: am5xy.AxisRendererX.new(root, {
+                                minGridDistance: 20
+                            }),
+                            tooltip: am5.Tooltip.new(root, {})
+                        }));
+                        xAxis.data.setAll(data);
+                        xAxis.get("renderer").labels.template.setAll({
+                            rotation: -45,
+                            textAlign: "right"
+                        });
+                        let series = chart.series.push(am5xy.ColumnSeries.new(root, {
+                            name: categoryAxisLabel,
+                            xAxis: xAxis,
+                            yAxis: yAxis,
+                            valueYField: valueField,
+                            categoryXField: categoryField,
+                            tooltip: am5.Tooltip.new(root, {
+                                labelText: "{valueY}"
+                            })
+                        }));
+                        series.columns.template.setAll({ cornerRadiusTL: 5, cornerRadiusTR: 5 });
+                        series.columns.template.adapters.add("fill", function (fill, target) {
+                            return chart.get("colors").getIndex(series.columns.indexOf(target));
+                        });
+                        series.columns.template.adapters.add("stroke", function (stroke, target) {
+                            return chart.get("colors").getIndex(series.columns.indexOf(target));
+                        });
+                        series.data.setAll(data);
+                        chart.set("cursor", am5xy.XYCursor.new(root, {}));
+                    });
+                });
+        }
+
+        createBarChart('chartSalesByCity', '/api/sales-by-city', 'City', 'total_sales', 'Total Sales');
+        createDonutChart('chartPopularProducts', '/api/popular-products', 'ProductLine', 'total_sales');
+        createGroupedColumnChart('chartCustomerDemographics', '/api/customer-demographics');
+
+        const topProductsTableBody = document.getElementById('top-products-table').querySelector('tbody');
+        function updateTopProductsTable() {
+            fetch('/api/top-products')
+                .then(response => response.json())
+                .then(data => {
+                    topProductsTableBody.innerHTML = '';
+                    data.forEach(product => {
+                        const row = topProductsTableBody.insertRow();
+                        const productCell = row.insertCell();
+                        const salesCell = row.insertCell();
+                        productCell.textContent = product.ProductLine;
+                        salesCell.textContent = `$${product.total_sales.toFixed(2)}`;
+                    });
+                });
+        }
+        updateTopProductsTable();
+
+        const cityFilterRadios = document.getElementById('city-filter-radios');
+        let cities = [];
+
+        fetch('/api/sales-by-city')
+            .then(response => response.json())
+            .then(data => {
+                cities = data.map(item => item.City);
+                cities.forEach(city => {
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = 'cityFilter';
+                    radio.value = city;
+                    radio.id = `city-${city}`;
+                    const label = document.createElement('label');
+                    label.textContent = city;
+                    label.setAttribute('for', `city-${city}`);
+                    cityFilterRadios.appendChild(radio);
+                    cityFilterRadios.appendChild(label);
+                    const br = document.createElement('br');
+                    cityFilterRadios.appendChild(br);
+
+                    radio.addEventListener('change', () => {
+                        updateSalesByProductFiltered(city);
+                    });
+                });
+            });
+
+        function updateSalesByProductFiltered(city) {
+            const containerId = 'chartSalesByProductFiltered';
+            const dataUrl = `/api/sales-by-product-line-filtered/${city}`;
+
+            fetch(dataUrl)
+                .then(response => response.json())
+                .then(data => {
+                    let existingRoot = am5.registry.rootFor(containerId);
+                    if (existingRoot) {
+                        existingRoot.dispose();
+                    }
+                    createColumnChart(containerId, dataUrl, 'ProductLine', 'total_sales', 'Total Sales');
+                });
+        }
+    </script>
+</body>
+</html>
