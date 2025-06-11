@@ -1,5 +1,8 @@
 # 🛒 Supermarket Dashboard - Data Visualization Project
 
+![Screenshot 2025-06-11 040529](https://github.com/user-attachments/assets/792aef64-6508-4f06-8ef6-73fafd8fbd84)
+
+
 A Node.js-based web dashboard application for visualizing supermarket sales data using SQLite and CSV ingestion. This project provides an interactive API backend for sales insights, customer demographics, product popularity, and revenue analytics.
 
 ---
